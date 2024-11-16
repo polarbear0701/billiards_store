@@ -32,7 +32,18 @@ public class StaffController {
     }
 
     @GetMapping("/login")
-    public String displayLogin(){
-        return "login";
+    public String loginPage(Model model, String error, String logout) {
+        if (error != null) {
+            model.addAttribute("errorMessage", "Invalid username or password.");
+        }
+        if (logout != null) {
+            model.addAttribute("logoutMessage", "You have been logged out successfully.");
+        }
+        return "login"; // Return the login.html view
+    }
+
+    @GetMapping("/home")
+    public String homePage() {
+        return "home"; // Return the home.html view
     }
 }

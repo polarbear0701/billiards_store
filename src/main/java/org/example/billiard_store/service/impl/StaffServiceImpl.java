@@ -5,14 +5,18 @@ import org.example.billiard_store.model.Staff;
 import org.example.billiard_store.repository.StaffRepository;
 import org.example.billiard_store.service.StaffService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class StaffServiceImpl implements StaffService {
+public class StaffServiceImpl implements StaffService, UserDetailsService {
     private final StaffRepository staffRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -40,8 +44,22 @@ public class StaffServiceImpl implements StaffService {
                 .build();
     }
 
-    public Staff registerNewStaff(Staff staff) {
+    public void registerNewStaff(Staff staff) {
         staff.setPassword(passwordEncoder.encode(staff.getPassword()));
-        return staffRepository.save(staff);
+        staffRepository.save(staff);
     }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Staff staff = staffRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+
+        return org.springframework.security.core.userdetails.User
+                .builder()
+                .username(staff.getUsername())
+                .password(staff.getPassword())
+                .authorities(Collections.emptyList()) // No roles or authorities for now
+                .build();
+    }
+
 }

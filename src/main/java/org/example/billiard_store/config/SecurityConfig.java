@@ -19,13 +19,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/register", "/login"))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/login").permitAll()
+                        .requestMatchers("/register", "/login", "/styles/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")  // Custom login page
                         .defaultSuccessUrl("/home", true)  // Redirect to /home after login
+                        .failureUrl("/login?error")
                         .permitAll()
                 )
                 .logout(logout -> logout
